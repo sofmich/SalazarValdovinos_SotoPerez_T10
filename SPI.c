@@ -49,10 +49,10 @@
 			SPI0->MCR |= SPI_MCR_MSTR_MASK;
 			break;
 		case SPI_1:
-			SPI1->MCR |= SPIx_MCR_MSTR_MASK;
+			SPI1->MCR |= SPI_MCR_MSTR_MASK;
 			break;
 		case SPI_2:
-			SPI2->MCR |= SPIx_MCR_MSTR_MASK;
+			SPI2->MCR |= SPI_MCR_MSTR_MASK;
 			break;
 		default:
 			break;
@@ -63,10 +63,10 @@
 			SPI0->MCR &= ~SPI_MCR_MSTR_MASK;
 			break;
 		case SPI_1:
-			SPI1->MCR &= ~SPIx_MCR_MSTR_MASK;
+			SPI1->MCR &= ~SPI_MCR_MSTR_MASK;
 			break;
 		case SPI_2:
-			SPI2->MCR &= ~SPIx_MCR_MSTR_MASK;
+			SPI2->MCR &= ~SPI_MCR_MSTR_MASK;
 			break;
 		default:
 			break;
@@ -310,24 +310,24 @@ uint8_t SPI_tranference(spi_channel_t channel, uint8_t data)
 void SPI_init(const spi_config_t* config_struct)
 {
 	/*Enable the clock*/
-	SPI_clk(g_spi_config->spi_channel);
+	SPI_clk(config_struct->spi_channel);
 
 	/*GPIO pin control register configuration from struct*/
-	GPIO_clock_gating(g_spi_config->spi_gpio_port.gpio_port_name);
+	GPIO_clock_gating(config_struct->spi_gpio_port.gpio_port_name);
 	/*It needs to pins to get the output and set the clock or input*/
-	GPIO_pin_control_register(g_spi_config->spi_gpio_port.gpio_port_name,
-					  g_spi_config->spi_gpio_port.spi_clk, &(g_spi_config->pin_config));
-	GPIO_pin_control_register(g_spi_config->spi_gpio_port.gpio_port_name,
-		              g_spi_config->spi_gpio_port.spi_sout, &(g_spi_config->pin_config));
+	GPIO_pin_control_register(config_struct->spi_gpio_port.gpio_port_name,
+			config_struct->spi_gpio_port.spi_clk, &(config_struct->pin_config));
+	GPIO_pin_control_register(config_struct->spi_gpio_port.gpio_port_name,
+			config_struct->spi_gpio_port.spi_sout, &(config_struct->pin_config));
 
 	/*SPI configuration of all spi parameters *use all functions above* */
-	SPI_set_master(g_spi_config->spi_channel, g_spi_config->spi_master);
-	SPI_fifo(g_spi_config->spi_channel, g_spi_config->spi_enable_fifo);
-	SPI_clock_polarity(g_spi_config->spi_channel, g_spi_config->spi_polarity);
-	SPI_frame_size(g_spi_config->spi_channel, g_spi_config->spi_frame_size);
-	SPI_clock_phase(g_spi_config->spi_channel, g_spi_config->spi_phase);
-	SPI_baud_rate(g_spi_config->spi_channel, g_spi_config->spi_baudrate);
-	SPI_msb_first(g_spi_config->spi_channel, g_spi_config->spi_lsb_or_msb);
-	SPI_enable(g_spi_config->spi_channel);
+	SPI_set_master(config_struct->spi_channel, config_struct->spi_master);
+	SPI_fifo(config_struct->spi_channel, config_struct->spi_enable_fifo);
+	SPI_clock_polarity(config_struct->spi_channel, config_struct->spi_polarity);
+	SPI_frame_size(config_struct->spi_channel, config_struct->spi_frame_size);
+	SPI_clock_phase(config_struct->spi_channel, config_struct->spi_phase);
+	SPI_baud_rate(config_struct->spi_channel, config_struct->spi_baudrate);
+	SPI_msb_first(config_struct->spi_channel, config_struct->spi_lsb_or_msb);
+	SPI_enable(config_struct->spi_channel);
 
 }
