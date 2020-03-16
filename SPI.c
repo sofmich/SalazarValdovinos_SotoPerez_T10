@@ -1,11 +1,12 @@
 /*
  * SPI.c
  *
- *  Created on: Mar 6, 2020
- *      Author: Momo
+ *  Created on: Mar 14, 2020
+ *      Author: Omar Soto Perez & Sofia Salazar Valdivinos
  */
 
 #include "SPI.h"
+
 /*it enable the clock module of the SPI by modifying the MDIS bits*/
  void SPI_enable(spi_channel_t channel)
  {
@@ -57,7 +58,8 @@
 		default:
 			break;
 		}
-	} else {
+	}
+	else {
 		switch (channel) {
 		case SPI_0:
 			SPI0->MCR &= ~SPI_MCR_MSTR_MASK;
@@ -72,7 +74,6 @@
 			break;
 		}
 	}
-
  }
 /*It activate the TX and RX FIFOs of the SPI depending on the value of enableOrdisable*/
  void SPI_fifo(spi_channel_t channel, spi_enable_fifo_t enable_or_disable)
@@ -80,20 +81,20 @@
 	 if (SPI_DISABLE_FIFO == enable_or_disable) {
 		switch (channel) {
 		case SPI_0:
-
-			SPI0->MCR &= ~(SPI_MCR_DIS_RXF_MASK);
-			SPI0->MCR &= ~(SPI_MCR_DIS_TXF_MASK);
+			SPI0->MCR &= ~(SPI_MCR_DIS_RXF_MASK); /*Disable RX (data in)*/
+			SPI0->MCR &= ~(SPI_MCR_DIS_TXF_MASK); /*Disable TX (data out)*/
 			break;
+
 		case SPI_1:
-
-			SPI1->MCR &= ~(SPI_MCR_DIS_RXF_MASK); /*Disable RX (data in)*/
-			SPI1->MCR &= ~(SPI_MCR_DIS_TXF_MASK); /*Disable TX (data out*/
+			SPI1->MCR &= ~(SPI_MCR_DIS_RXF_MASK);
+			SPI1->MCR &= ~(SPI_MCR_DIS_TXF_MASK);
 			break;
-		case SPI_2:
 
+		case SPI_2:
 			SPI2->MCR &= ~(SPI_MCR_DIS_RXF_MASK);
 			SPI2->MCR &= ~(SPI_MCR_DIS_TXF_MASK);
 			break;
+
 		default:
 			break;
 		}
@@ -299,11 +300,27 @@ void SPI_stop_tranference(spi_channel_t channel)
 /*It transmits the information contained in data*/
 uint8_t SPI_tranference(spi_channel_t channel, uint8_t data)
 {
-	/*Sends information of 1byte length*/
-	SPI0->PUSHR = (data);
-	while (0 == (SPI0->SR & SPI_SR_TCF_MASK));
-	SPI0->SR = SPI_SR_TCF_MASK;
-
+//	/*Sends information of 1byte length*/
+//	SPI0->PUSHR = (data);
+//	while (0 == (SPI0->SR & SPI_SR_TCF_MASK)){}
+//	SPI0->SR = SPI_SR_TCF_MASK;
+	switch(channel){
+	case SPI_0:
+		SPI0->PUSHR = ((SPI0->PUSHR) & ~(SPI_PUSHR_TXDATA_MASK)) | data;
+		while(!(SPI0->SR & SPI_SR_TCF_MASK));
+		delay(100);
+		break;
+	case SPI_1:
+		SPI1->PUSHR = ((SPI1->PUSHR) & ~(SPI_PUSHR_TXDATA_MASK)) | data;
+		while(!(SPI1->SR & SPI_SR_TCF_MASK));
+		delay(100);
+		break;
+	case SPI_2:
+		SPI2->PUSHR = ((SPI2->PUSHR) & ~(SPI_PUSHR_TXDATA_MASK)) | data;
+		while(!(SPI2->SR & SPI_SR_TCF_MASK));
+		delay(100);
+		break;
+	}
 }
 /*It configures the SPI for transmission, this function as arguments receives a pointer to a constant structure where are all
  * the configuration parameters*/
@@ -319,7 +336,6 @@ void SPI_init(const spi_config_t* config_struct)
 			config_struct->spi_gpio_port.spi_clk, &(config_struct->pin_config));
 	GPIO_pin_control_register(config_struct->spi_gpio_port.gpio_port_name,
 			config_struct->spi_gpio_port.spi_sout, &(config_struct->pin_config));
-
 	/*SPI configuration of all spi parameters *use all functions above* */
 	SPI_set_master(config_struct->spi_channel, config_struct->spi_master);
 	SPI_fifo(config_struct->spi_channel, config_struct->spi_enable_fifo);
@@ -330,4 +346,14 @@ void SPI_init(const spi_config_t* config_struct)
 	SPI_msb_first(config_struct->spi_channel, config_struct->spi_lsb_or_msb);
 	SPI_enable(config_struct->spi_channel);
 
+}
+
+void delay(uint32_t delay)
+{
+	volatile uint32_t counter;
+
+	for(counter=delay; counter > 0; counter--)
+	{
+		__asm("nop");
+	}
 }
