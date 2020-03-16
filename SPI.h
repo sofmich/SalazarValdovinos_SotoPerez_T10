@@ -97,6 +97,7 @@ typedef struct
 	spi_port_config_t spi_gpio_port;
 } spi_config_t;
 
+void delay(uint32_t delay);
 
 /*it enable the clock module of the SPI by modifying the MDIS bits*/
  void SPI_enable(spi_channel_t channel);
